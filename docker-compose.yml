@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14
+    container_name: flights_db
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypass
+      POSTGRES_DB: flights_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  
+  collector:
+    build: ./collector
+    container_name: flight_collector
+    environment:
+      - DB_HOST=db
+      - DB_NAME=flights_db
+      - DB_USER=myuser
+      - DB_PASS=mypass
+    depends_on:
+      - db
+
+  dashboard:
+    build: ./dashboard
+    container_name: flight_dashboard
+    environment:
+      - DB_HOST=db
+      - DB_NAME=flights_db
+      - DB_USER=myuser
+      - DB_PASS=mypass
+    ports:
+      - "8050:8050"
+    depends_on:
+      - db
+
+volumes:
+  db_data:
